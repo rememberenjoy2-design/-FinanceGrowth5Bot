@@ -1,10 +1,9 @@
 import logging
 import os
-import asyncio
 from telegram import Update, InlineKeyboardButton, InlineKeyboardMarkup
 from telegram.ext import Application, CommandHandler, ContextTypes
 
-# Enable logging to see activity in your Railway deployment logs
+# Enable logging to track activity in your Railway deployment logs
 logging.basicConfig(
     format="%(asctime)s - %(name)s - %(levelname)s - %(message)s", level=logging.INFO
 )
@@ -16,6 +15,10 @@ TOKEN = os.getenv("TELEGRAM_BOT_TOKEN")
 async def start(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
     """Responds to anyone who starts the bot."""
     user = update.effective_user
+    
+    if not update.message:
+        return
+
     logger.info(f"User {user.first_name} ({user.id}) started the bot.")
     
     # Your custom welcome message
@@ -42,15 +45,8 @@ def main() -> None:
         logger.error("No TELEGRAM_BOT_TOKEN found in environment variables!")
         return
 
-    # Fix for Python 3.13+ compatibility with python-telegram-bot v21+
-    if not hasattr(Application, '_Application__stop_running_marker'):
-        Application._Application__stop_running_marker = property(
-            lambda self: getattr(self, '_stop_running_marker_fallback', None),
-            lambda self, value: setattr(self, '_stop_running_marker_fallback', value)
-        )
-
     logger.info("Building the application...")
-    # Build the application
+    # Build the application using v22+ specifications
     application = Application.builder().token(TOKEN).build()
 
     # Register the /start command handler
