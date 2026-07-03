@@ -1,5 +1,6 @@
 import logging
 import os
+import asyncio
 from telegram import Update, InlineKeyboardButton, InlineKeyboardMarkup
 from telegram.ext import Application, CommandHandler, ContextTypes
 
@@ -41,6 +42,14 @@ def main() -> None:
         logger.error("No TELEGRAM_BOT_TOKEN found in environment variables!")
         return
 
+    # Fix for Python 3.13+ compatibility with python-telegram-bot v21+
+    if not hasattr(Application, '_Application__stop_running_marker'):
+        Application._Application__stop_running_marker = property(
+            lambda self: getattr(self, '_stop_running_marker_fallback', None),
+            lambda self, value: setattr(self, '_stop_running_marker_fallback', value)
+        )
+
+    logger.info("Building the application...")
     # Build the application
     application = Application.builder().token(TOKEN).build()
 
